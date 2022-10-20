@@ -1,0 +1,209 @@
+import random
+import datetime
+import openpyxl
+import pandas as pd
+
+fecha_actual = datetime.date.today()
+id_cliente = []
+id_sala = []
+Registro_sala = {}
+registro_clientes = {}
+reserva = {}
+lista_reserva = list(reserva.items())
+lista_Registro_sala = list(Registro_sala.items())
+listas_ocupadas = []
+turnos = {1:"Matutino",
+          2:"Vespertino",
+          3:"Nocturno"}
+
+while True:
+    print("***********")
+    print("*     MENÚ PRINCIPAL        *")
+    print("***********")
+
+    print("1) Reservaciones")
+    print("2) Reportes")
+    print("3) Registrar una sala")
+    print("4) Registrar un cliente")
+    print("5) Salir")
+    respuesta = input("¿Que opción desea?: ")
+
+    try:
+     respuesta_int = int(respuesta)
+    except ValueError:
+        print("* NO ES VALIDA LA RESPUESTA *")
+    except Exception:
+        print("** SE HA PRESENTADO UNA EXCEPCIÓN")
+   
+
+    if respuesta_int == 1:
+        print("***********")
+        print("*      RESERVACIONES        *")
+        print("***********")
+        print("1) Registrar nueva reservación")
+        print("2) Modificar descripción de una reservación")
+        print("3) Consultar disponibilidad de salas para una fecha")
+        print("4) Salir")
+        res= input("¿Qué opción desea?: ")
+
+        try:
+           res_int = int(res)
+        except ValueError:
+           print("* NO ES VALIDA LA RESPUESTA *")
+        except Exception:
+            print("** SE HA PRESENTADO UNA EXCEPCIÓN")
+        
+        if res_int == 1:
+            print("**********")
+            print("        RESERVACIÓN         ")
+            print("**********")
+
+            print(f"Clientes registrados: {registro_clientes}")
+            cliente_registrado = input("Clave de cliente a reservar una sala: ")
+            if cliente_registrado in id_cliente: 
+                 print(f"Nombre del cliente: {registro_clientes[cliente_registrado]} ")
+                 print(f"Salas disponibles: {Registro_sala}")
+                 sala_reservada = input(f"Clave de la sala a reservar: ")
+                 if sala_reservada in id_sala:
+                     num_res = [random.randrange(1,1001) for valor in range(1000)]
+                     res_num = format(id(num_res), )
+                     evento = input("Nombre del evento: ")
+                     fecha_capturada = input("Fecha de reserva de tu sala (dd/mm/aaaa):" )
+                     fecha_reserva = datetime.datetime.strptime(fecha_capturada, "%d/%m/%Y").date()
+                     fr_procesada = fecha_reserva.strftime("%d/%m/%Y")
+                     if fecha_actual < fecha_reserva:
+                           Turno = input(f"Turno {turnos}: ") 
+                           try:
+                               Turno_int = int(Turno)
+                           except ValueError:
+                                print("NO ES VALIDA ESTA RESPUESTA")
+                           except Exception:
+                               print("HA OCURRIDO UNA EXCEPCIÓN")
+                           reserva [res_num] = (registro_clientes[clave_cliente], Registro_sala[sala_reservada], turnos[Turno_int], fr_procesada, evento)
+                      
+                     else:
+                        print("NO SE PUEDE RESERVAR EN ESTA FECHA")
+                 else:
+                  print("Esta sala no existe")
+        else:
+              print("CLIENTE NO REGISTRADO/ENCONTRADO")
+
+        if res_int == 2:
+            print("***************")
+            print("        MODIFICACION DE DESCRIPCIÓN        ")
+            print("***************")
+    
+            print(f"Salas registradas: {reserva} ")
+            clave_salaa = input("Clave de la sala a la que le desea cambiar el nombre del evento: ")                
+            nombre_nuevo = input("¿Qué nombre nuevo será?: ")
+            reserva [clave_salaa] = (registro_clientes[cliente_registrado], Registro_sala[sala_reservada], turnos[Turno_int], fr_procesada, nombre_nuevo)
+            print(reserva)
+
+        if res_int == 3:
+            print("**************")
+            print("        DISPONIBILIDAD DE SALAS         ")
+            print("**************")
+            captura_de_fecha = input("Salas disponilbes para una fecha en especifico (dd/mm/aaaa):" )
+            fecha_diponible = datetime.datetime.strptime(fecha_capturada, "%d/%m/%Y").date()
+            fecha_disp_pro = fecha_reserva.strftime("%d/%m/%Y")
+            print(f"** Salas disponibles para la fecha {fecha_disp_pro}")  
+            if Registro_sala not in listas_ocupadas:
+                for clave, valor in lista_Registro_sala:
+                     print(" SALA ", "     ","  CUPO ", "     ")
+                     print(valor[0], "     ", valor[1], "     ")
+
+
+        elif respuesta_int == 4:
+             break
+ 
+
+    if respuesta_int == 2:
+        print("***********")
+        print("*        REPORTES           *")
+        print("***********")
+        print("1) Reporte en pantalla de reservaciones para una fecha")
+        print("2) Exportar reporte tabular en Excel")
+        print("3) Salir")
+        rep= input("¿Qué opción desea?: ")
+        try:
+             rep_int = int(rep)
+        except ValueError:
+           print("* NO ES VALIDA LA RESPUESTA *")
+        except Exception:
+            print("** SE HA PRESENTADO UNA EXCEPCIÓN")  
+        if rep_int == 1:
+            print("*******^******")
+            print("        REPORTE EN PANTALLA         ")
+            print("************")
+            fecha_buscar = input("fecha de reservaciones que desea ver (dd/mm/aaaa): ")
+            for clave, valor in lista_reserva:
+              if valor [3] == fecha_buscar:
+                listas_ocupadas.append(clave)
+                print(" SALA ", "     ","CLIENTE", "     ", "EVENTO","     ", " TURNO",)
+                print(valor[1], "     ", valor[0], "     ", valor[4],"     ", valor[3],)
+            
+              
+        if rep_int == 2:
+            print("***********")
+            print("        REPORTE EN EXCEL       ")
+            print("***********")
+            import pandas as pd
+        reservaciones = [[clave_sala],
+                        [nombre_sala],
+                        [Turno]]
+        columnas = [fecha_buscar] # definimos los nombres de las columnas
+        filas = ["Clave de la sala", "Nombre de la sala", "Turno"] # definimos los nombres de las filas
+        df = pd.DataFrame(reservaciones, columns=columnas, index=filas) 
+        print(df)
+        df.to_csv('reservaciones.csv')
+        df = pd.read_csv('reservaciones.csv')
+        df.to_excel('reservaciones.xlsx', index=False)
+            
+    elif res_int == 3:
+          break
+     
+
+    if respuesta_int == 3:
+        print("************")
+        print("        REGISTRAR SALA          ")
+        print("************")
+        numero = [random.randrange(1,1001) for valor in range(1)]
+        clave_sala = format(id(numero),"x")
+        print(f"Clave de la sala: {clave_sala}")
+        id_sala.append(clave_sala)
+        nombre_sala = input("Nombre de la sala: ")
+        if (nombre_sala.isspace() or len(nombre_sala) <=0):
+           print("Es necesario que registre un nombre para la sala")
+
+        cupo_sala = input("Cupo de sala: ")
+
+        try:
+          cupo_sala_int = int(cupo_sala)
+        except ValueError:
+          print("* NO ES VALIDA LA RESPUESTA *")
+        except Exception:
+          print("** SE HA PRESENTADO UNA EXCEPCIÓN")
+        
+        if cupo_sala_int > 0:
+           Registro_sala[clave_sala] = nombre_sala,cupo_sala_int
+           print("La Sala ha sido registrada")
+        else:
+            print("El cupo de la sala debe ser mayor a 0")
+        
+
+    if respuesta_int == 4:
+       print("**************")
+       print("       REGISTRO DE NUEVO CLIENTE        ")
+       print("**************")
+       num = [random.randrange(1,1001) for valor in range(1000)]
+       clave_cliente = format(id(num), )
+       print(f"Clave del cliente: {clave_cliente}")
+       nombre_cliente = input("Nombre del cliente: ")
+       if (nombre_cliente.isspace() or len(nombre_cliente) <=0):
+           print("Es necesario que registre un nombre")
+       id_cliente.append(clave_cliente)
+       registro_clientes[clave_cliente] = nombre_cliente
+       print(f"Cliente registrado: {registro_clientes}")
+
+    elif respuesta_int == 5:
+         break
